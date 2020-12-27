@@ -50,18 +50,37 @@ void algorithm_A(Board board, Player player, int index[]){
        srand(time(NULL)*time(NULL));
     int row, col;
     int color = player.get_color();
+    int b_color;
+   
     
-    Board copied(board);
 
-    copied.get_orbs_num(1, 1);
-    while(1){
-        row = rand() % 5;
-        col = rand() % 6;
-        if(board.get_cell_color(row, col) == color || board.get_cell_color(row, col) == 'w') break;
+
+    Board copied(board);
+    int max_val = INF_N;
+    int val;
+    for (int i = 0; i < ROW; ++i) {
+        for (int j = 0; j < COL; ++j) {
+            b_color = board.get_cell_color(i, j);
+            if (b_color == player.get_color() || b_color =='w') {
+
+                if (color == RED) {
+                    Player he(BLUE);
+                    val = find_value(i, j, board, player, he, 1, 0, INF_N, INF);
+                }
+                else {
+                    Player he(RED);
+                    val = find_value(i, j, board, player, he, 1, 0, INF_N, INF);
+                }
+                
+                if (val > max_val) {
+                    index[0] = i;
+                    index[1] = j;
+                }
+            }
+        }
     }
 
-    index[0] = row;
-    index[1] = col;
+  
     
 }
 
@@ -82,7 +101,7 @@ int evaluate(Board board,int my_color) {
     return score;
 }
 
-int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, int deep, int upper, int lower) {
+int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, int deep, int lower, int upper) {
 
     if (my_turn)
         board.place_orb(i, j, &me);
@@ -90,19 +109,33 @@ int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, 
     else
         board.place_orb(i, j, &he);
 
-    if (deep == MAX_DEEP) {//return the current score
-        if (my_turn)
-            return evaluate(board, me.get_color());
+    //board.print_current_board(i, j, 666);
+    int my_color = me.get_color();
+    int he_color = he.get_color();
 
-        else
-            return evaluate(board, he.get_color());
+    int my_color_cnt = 0;
+    int he_color_cnt = 0;
+    for (int row = 0; row < ROW; ++row) {
+        for (int col = 0; col < COL; ++col) {
+            if (board.get_cell_color(row,col) == my_color) ++my_color_cnt;
+            else if (board.get_cell_color(row,col) == he_color) ++he_color_cnt;
 
+        }
     }
+    bool is_win = board.win_the_game(me);
+    bool is_loss = board.win_the_game(he);
+
+
+
+    if (deep == MAX_DEEP) //return the current score
+        return evaluate(board, me.get_color());
+    else if (is_win&&my_color_cnt>1) return INF;
+    else if (is_loss&& he_color_cnt > 1) return INF_N;
+
     else {//find the best path recurrsively
         if (my_turn) {//should do sth to end finding earily
 
             int score = INF_N;
-            int my_color = me.get_color();
             int val;
             bool cut = 0;
             for (int row = 0; row < ROW && !cut; ++row) {
@@ -110,8 +143,8 @@ int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, 
 
                     int current_color = board.get_cell_color(row, col);
 
-                    if (current_color == my_color || current_color == 'w') {
-                        val = find_value(row, col, board, me, he, my_turn, deep + 1,upper,lower );
+                    if (current_color == he_color || current_color == 'w') {
+                        val = find_value(row, col, board, me, he, 0, deep + 1,upper,lower );
                         score = max(score, val);
 
                         lower = max(lower, score);
@@ -130,7 +163,6 @@ int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, 
         else {//minimum score that the maximizing player is assured .althpa
             //maximum score that the minimizing player is assured of. beta
             int score = INF;
-            int my_color = he.get_color();
             int val;
             bool cut = 0;
             for (int row = 0; row < ROW&&!cut; ++row) {
@@ -139,7 +171,7 @@ int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, 
                     int current_color = board.get_cell_color(row, col);
 
                     if (current_color == my_color || current_color == 'w') {
-                        val = find_value(row, col, board, me, he, my_turn, deep + 1, upper, lower);
+                        val = find_value(row, col, board, me, he, 1, deep + 1, upper, lower);
                         score = min(score, val);
 
                         upper = min(upper, score);
