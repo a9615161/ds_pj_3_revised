@@ -38,7 +38,9 @@ typedef struct pair_{
 }pos;
 
 int evaluate(Board board,int color); //count for the current state of 
-//int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, int deep, int& upper, int& lower);
+int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, int deep, int& upper, int& lower);
+//upper bound for max,lower bound for min .for the alpha-beta pruning
+
 void algorithm_A(Board board, Player player, int index[]){
 
     //////your algorithm design///////////
@@ -75,5 +77,47 @@ int evaluate(Board board,int my_color) {
     }
 
     return score;
+}
+
+int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, int deep, int& upper, int& lower) {
+
+    if (my_turn)
+        board.place_orb(i, j, &me);
+
+    else
+        board.place_orb(i, j, &he);
+
+    if (deep == MAX_DEEP) {//return the current score
+        if (my_turn)
+            return evaluate(board, me.get_color());
+
+        else
+            return evaluate(board, he.get_color());
+
+    }
+    else {//find the best path recurrsively
+        if (my_turn) {//should do sth to end finding earily
+
+            int max = INF_N;
+            int my_color = me.get_color();
+            int val;
+            for (int row = 0; row < ROW; ++row) {
+                for (int col = 0; col < COL; ++col) {
+
+                    int current_color = board.get_cell_color(row, col);
+
+                    if (current_color == my_color || current_color == 'w') {
+                        val = find_value(row, col, board, me, he, my_turn, deep + 1, last_move);
+                        max = (max > val) ? max : val;
+                    }
+                }
+            }
+
+        }
+        else {
+
+        }
+    }
+
 }
 
