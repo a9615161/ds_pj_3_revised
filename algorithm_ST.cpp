@@ -32,13 +32,16 @@ using namespace std;
 #define BLUE 'b'
 #define MAX_DEEP 5
 
+#define max(a,b) a>b?a:b
+#define min(a,b) a<b?a:b
+
 typedef struct pair_{
     int i;
     int j;
 }pos;
 
 int evaluate(Board board,int color); //count for the current state of 
-int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, int deep, int& upper, int& lower);
+int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, int deep, int upper, int lower);
 //upper bound for max,lower bound for min .for the alpha-beta pruning
 
 void algorithm_A(Board board, Player player, int index[]){
@@ -79,7 +82,7 @@ int evaluate(Board board,int my_color) {
     return score;
 }
 
-int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, int deep, int& upper, int& lower) {
+int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, int deep, int upper, int lower) {
 
     if (my_turn)
         board.place_orb(i, j, &me);
@@ -98,26 +101,65 @@ int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, 
     else {//find the best path recurrsively
         if (my_turn) {//should do sth to end finding earily
 
-            int max = INF_N;
+            int score = INF_N;
             int my_color = me.get_color();
             int val;
-            for (int row = 0; row < ROW; ++row) {
+            bool cut = 0;
+            for (int row = 0; row < ROW && !cut; ++row) {
                 for (int col = 0; col < COL; ++col) {
 
                     int current_color = board.get_cell_color(row, col);
 
                     if (current_color == my_color || current_color == 'w') {
-                        val = find_value(row, col, board, me, he, my_turn, deep + 1,alp );
-                        max = (max > val) ? max : val;
+                        val = find_value(row, col, board, me, he, my_turn, deep + 1,upper,lower );
+                        score = max(score, val);
+
+                        lower = max(lower, score);
+
+                        if (upper <= lower) {
+                            cut = 1;
+                            break;
+                        }
+                    }
+                }
+            }
+            upper = lower; 
+            lower = INF_N; //to search for new min, the upper is unknow
+            return score;
+        }
+        else {//minimum score that the maximizing player is assured .althpa
+            //maximum score that the minimizing player is assured of. beta
+            int score = INF;
+            int my_color = he.get_color();
+            int val;
+            bool cut = 0;
+            for (int row = 0; row < ROW&&!cut; ++row) {
+                for (int col = 0; col < COL; ++col) {
+
+                    int current_color = board.get_cell_color(row, col);
+
+                    if (current_color == my_color || current_color == 'w') {
+                        val = find_value(row, col, board, me, he, my_turn, deep + 1, upper, lower);
+                        score = min(score, val);
+
+                        upper = min(upper, score);
+
+                        if (upper <= lower) {
+                            cut = 1;
+                            break;
+                        }
+                            
                     }
                 }
             }
 
-        }
-        else {
+            lower = upper;//in the end of finding "min", the upper will be ensured ,and thus become the lower 
+            upper = INF; //to search for new min, the upper is unknow
+            return score;
 
         }
     }
+
 
 }
 
