@@ -107,7 +107,7 @@ int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, 
                     int current_color = board.get_cell_color(row, col);
 
                     if (current_color == my_color || current_color == 'w') {
-                        val = find_value(row, col, board, me, he, my_turn, deep + 1, last_move);
+                        val = find_value(row, col, board, me, he, my_turn, deep + 1,alp );
                         max = (max > val) ? max : val;
                     }
                 }
