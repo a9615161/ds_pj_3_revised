@@ -1,8 +1,8 @@
 #include <iostream>
-#include "../include/board.h"
-#include "../include/player.h"
-#include "../include/rules.h"
-#include "../include/algorithm.h"
+#include "board.h"
+#include "player.h"
+#include "rules.h"
+#include "algorithm.h"
 
 using namespace std;
 

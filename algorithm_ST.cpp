@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
-#include "../include/algorithm.h"
+#include "algorithm.h"
 
 /******************************************************
  * In your algorithm, you can just use the the funcitons
@@ -39,7 +39,7 @@ typedef struct pair_{
 
 int evaluate(Board board,int color); //count for the current state of 
 //int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, int deep, int& upper, int& lower);
-int algorithm_A(Board board, Player player, int index[]){
+void algorithm_A(Board board, Player player, int index[]){
 
     //////your algorithm design///////////
        srand(time(NULL)*time(NULL));

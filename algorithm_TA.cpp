@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
-#include "../include/algorithm.h"
+#include "algorithm.h"
 
 using namespace std;
 

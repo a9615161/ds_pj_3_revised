@@ -1,6 +1,6 @@
 #include <iostream>
-#include "../include/board.h"
-#include "../include/rules.h"
+#include "board.h"
+#include "rules.h"
 
 using namespace std;
 

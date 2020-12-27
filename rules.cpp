@@ -1,4 +1,4 @@
-#include "../include/rules.h"
+#include "rules.h"
 #include <iostream>
 
 using namespace std;
