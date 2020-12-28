@@ -65,14 +65,15 @@ void algorithm_A(Board board, Player player, int index[]){
 
                 if (color == RED) {
                     Player he(BLUE);
-                    val = find_value(i, j, board, player, he, 0, 0, INF_N, INF);
+                    val = find_value(i, j, board, player, he, 1, 0, INF_N, INF);
                 }
                 else {
                     Player he(RED);
-                    val = find_value(i, j, board, player, he, 0, 0, INF_N, INF);
+                    val = find_value(i, j, board, player, he, 1, 0, INF_N, INF);
                 }
                 
                 if (val > max_val) {
+                    max_val = val;
                     index[0] = i;
                     index[1] = j;
                 }
@@ -92,7 +93,7 @@ int evaluate(Board board, int my_color) {
             int current_color = board.get_cell_color(i, j);
 
             if (current_color == my_color)
-                ;// ++score;
+                 ++score;
             else if (current_color != 'w')//own by other players
                 --score;
         }
@@ -102,14 +103,15 @@ int evaluate(Board board, int my_color) {
 }
 
 int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, int deep, int lower, int upper) {
-
+    int a;
+    //cin >> a;
     if (my_turn)
         board.place_orb(i, j, &me);
 
     else
         board.place_orb(i, j, &he);
 
-    //board.print_current_board(i, j, 666);
+    //board.print_current_board(i, j, deep);
     int my_color = me.get_color();
     int he_color = he.get_color();
 
@@ -127,10 +129,13 @@ int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, 
 
 
 
-    if (deep == MAX_DEEP) //return the current score
+
+    if (is_win&&my_color_cnt>1)
+        return INF;
+    else if (is_loss&& he_color_cnt > 1) 
+        return INF_N;
+    else if (deep == MAX_DEEP) //return the current score
         return evaluate(board, me.get_color());
-    else if (is_win&&my_color_cnt>1) return INF;
-    else if (is_loss&& he_color_cnt > 1) return INF_N;
 
     else {//find the best path recurrsively
         if (my_turn) {//should do sth to end finding earily
