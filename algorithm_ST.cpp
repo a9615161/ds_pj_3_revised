@@ -30,7 +30,7 @@ using namespace std;
 #define COL 6
 #define RED 'r'
 #define BLUE 'b'
-#define MAX_DEEP 5
+#define MAX_DEEP 4
 
 #define max(a,b) a>b?a:b
 #define min(a,b) a<b?a:b
@@ -65,11 +65,11 @@ void algorithm_A(Board board, Player player, int index[]){
 
                 if (color == RED) {
                     Player he(BLUE);
-                    val = find_value(i, j, board, player, he, 1, 0, INF_N, INF);
+                    val = find_value(i, j, board, player, he, 0, 0, INF_N, INF);
                 }
                 else {
                     Player he(RED);
-                    val = find_value(i, j, board, player, he, 1, 0, INF_N, INF);
+                    val = find_value(i, j, board, player, he, 0, 0, INF_N, INF);
                 }
                 
                 if (val > max_val) {
@@ -84,16 +84,16 @@ void algorithm_A(Board board, Player player, int index[]){
     
 }
 
-int evaluate(Board board,int my_color) {
+int evaluate(Board board, int my_color) {
     int score = 0;
-    
+
     for (int i = 0; i < ROW; ++i) {
         for (int j = 0; j < COL; ++j) {
             int current_color = board.get_cell_color(i, j);
 
             if (current_color == my_color)
-                ++score;
-            else if(current_color != 'w')//own by other players
+                ;// ++score;
+            else if (current_color != 'w')//own by other players
                 --score;
         }
     }
@@ -194,4 +194,34 @@ int find_value(int i, int j, Board board, Player& me, Player& he, bool my_turn, 
 
 
 }
+
+/*
+int evaluate(Board board,int my_color) {
+    int score = 0;
+
+    for (int i = 0; i < ROW; ++i) {
+        for (int j = 0; j < COL; ++j) {
+            int current_color = board.get_cell_color(i, j);
+            int cap = board.get_capacity(i,j);
+            int num = board.get_orbs_num(i,j);
+            int max_val = 0;
+
+            for (int k = -1; k <= 1; ++k) {
+                for (int l = -1; l <= 1; ++l)
+                    if (i+k<ROW&&j+l<COL&&board.get_cell_color(i + k, j + l) != current_color)
+                        ++max_val;
+            }
+            if (cap - num == 0)
+                cin >> max_val;
+            int val = max_val / (cap - num);
+            if (current_color == my_color)
+                score += val;
+            else if (current_color != 'w')//own by other players
+                score -= val;
+        }
+    }
+
+    return score;
+}
+*/
 

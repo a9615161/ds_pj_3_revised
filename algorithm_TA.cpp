@@ -9,8 +9,9 @@ void algorithm_B(Board board, Player player, int index[]){
     srand(time(NULL)*time(NULL));
     int row, col;
     int color = player.get_color();
-
+    int in1, in2;
     while(1){
+        //cin >> in1;
         row = rand() % 5;
         col = rand() % 6;
         if(board.get_cell_color(row, col) == color || board.get_cell_color(row, col) == 'w') break;
