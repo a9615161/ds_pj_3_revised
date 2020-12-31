@@ -32,7 +32,7 @@ int main(){
 
         if(board.win_the_game(red_player) && !first_two_step){
             cout << "Red Player won the game !!!" << endl;
-            return 0;
+            break;
         }
 
         //////////// Blue Player operations ////////////
@@ -48,7 +48,7 @@ int main(){
 
         if(board.win_the_game(blue_player) && !first_two_step){
             cout << "Blue Player won the game !!!" << endl;
-            return 0;
+            break;
         }
 
         first_two_step = false;
