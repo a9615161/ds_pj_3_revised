@@ -123,7 +123,7 @@ void Board::print_current_board(int i, int j, int round){
 
 bool Board::place_orb(int i, int j, Player * player){
     
-    if(index_range_illegal(i, j) || !placement_illegal(*player, cells[i][j])){
+    if(!index_range_illegal(i, j) && !placement_illegal(*player, cells[i][j])){
         int temp = cells[i][j].get_orbs_num();
         temp += 1;
         cells[i][j].set_orbs_num(temp);
