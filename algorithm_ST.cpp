@@ -31,7 +31,7 @@ using namespace std;
 #define RED 'r'
 #define BLUE 'b'
 #define MAX_DEEP 7
-
+#define MAX_RUNTIME 1
 #define max(a,b) a>b?a:b
 #define min(a,b) a<b?a:b
 
@@ -147,7 +147,7 @@ int find_value(int i, int j, Board board, Player me, Player he, bool my_turn, in
         return INF;
     else if (is_loss && he_color_cnt > 1)
         return INF_N;
-    else if (deep == MAX_DEEP|| (clock()-start_time) / CLOCKS_PER_SEC) //return the current score
+    else if (deep == MAX_DEEP || ((clock()-start_time) / CLOCKS_PER_SEC) > MAX_RUNTIME) //return the current score
         return evaluate(board, me,he);
 
     else {//find the best path recurrsively
