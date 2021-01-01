@@ -17,6 +17,8 @@ int main(){
     int index[2];
 
     Board record[1024];
+    int row[1024];
+    int col[1024];
     int i = 0;
     while(1){
 
@@ -25,8 +27,11 @@ int main(){
         board.place_orb(index[0], index[1], &red_player);
 
         if(rules_violation(red_player)) return 0;
-        if(i<1024)
+        if (i < 1024) {
             record[i++] = board;
+            row[i] = index[0];
+            col[i] = index[1];
+        }
         board.print_current_board(index[0], index[1], round);
         round++;
 
@@ -40,9 +45,11 @@ int main(){
         board.place_orb(index[0], index[1], &blue_player);
 
         if(rules_violation(blue_player)) return 0;
-        if (i < 1024)
+        if (i < 1024) {
             record[i++] = board;
-
+            row[i] = index[0];
+            col[i] = index[1];
+        }
         board.print_current_board(index[0], index[1], round);
         round++;
 
@@ -59,14 +66,15 @@ int main(){
         if (cmd == "l") {
             if (i >= 0)
                 --i;
-            record[i].print_current_board(0, 0, i + 1);
+            record[i].print_current_board(row[i], col[i], i + 1);
         }
         else if (cmd == "r") {
             if (i < 1024)
                 ++i;
-            record[i].print_current_board(0, 0, i + 1);
+            record[i].print_current_board(row[i], col[i], i + 1);
         }
-        else record[i].print_current_board(0, 0, i + 1);
+        else             record[i].print_current_board(row[i], col[i], i + 1);
+
 
         cin >> cmd;
     }
