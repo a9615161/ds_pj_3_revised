@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "algorithm.h"
+//#include "../include/algorithm.h"
 
 /******************************************************
  * In your algorithm, you can just use the the funcitons
@@ -40,8 +41,8 @@ typedef struct pair_ {
     int j;
 }pos;
 
-int evaluate(Board board,Player me,Player he); //count for the current state of 
-int find_value(int i, int j, Board board, Player me, Player he, bool my_turn, int deep, int upper, int lower,float start_time);
+int evaluate(Board board, Player me, Player he); //count for the current state of 
+int find_value(int i, int j, Board board, Player me, Player he, bool my_turn, int deep, int upper, int lower, float start_time);
 //upper bound for max,lower bound for min .for the alpha-beta pruning
 
 void algorithm_A(Board board, Player player, int index[]) {
@@ -64,11 +65,11 @@ void algorithm_A(Board board, Player player, int index[]) {
 
                 if (color == RED) {
                     Player he(BLUE);
-                    val = find_value(i, j, board, player, he, 1, 0, INF_N, INF,clock());
+                    val = find_value(i, j, board, player, he, 1, 0, INF_N, INF, clock());
                 }
                 else {
                     Player he(RED);
-                    val = find_value(i, j, board, player, he, 1, 0, INF_N, INF,clock());
+                    val = find_value(i, j, board, player, he, 1, 0, INF_N, INF, clock());
                 }
 
                 if (val > max_val) {
@@ -87,7 +88,7 @@ void algorithm_A(Board board, Player player, int index[]) {
 int chain_len(Board board, Player player, int visited[][COL], int i, int j) {
     if (!(0 <= i && i < ROW && 0 <= j && j < COL))return 0;
     if (visited[i][j])return 0;
-    if( player.get_color() != board.get_cell_color(i, j))return 0;
+    if (player.get_color() != board.get_cell_color(i, j))return 0;
 
     int num = board.get_orbs_num(i, j);
     int cap = board.get_capacity(i, j);
@@ -111,20 +112,21 @@ int evaluate(Board board, Player me, Player he) {
     int score = 0;
     int my_color = me.get_color();
     int he_color = he.get_color();
-    if (board.win_the_game(me) || he.is_illegal())return INF;
-    else if (board.win_the_game(he) || me.is_illegal())return INF_N;
+    if (he.is_illegal())return INF;
+    else if (me.is_illegal())return INF_N;
+
     bool flag_not_vulnerable = 1;
-    int my_orbs = 0 ;
+    int my_orbs = 0;
     int he_orbs = 0;
-    int visited[ROW ][COL];
+    int visited[ROW][COL];
     for (int i = 0; i < ROW; ++i) {
         for (int j = 0; j < COL; ++j) {
-            visited[i][ j] = 0;
+            visited[i][j] = 0;
             int current_color = board.get_cell_color(i, j);
             int cap = board.get_capacity(i, j);
             int num = board.get_orbs_num(i, j);
             int val;
-            
+
 
             if (current_color == my_color) {
                 my_orbs += num;
@@ -134,14 +136,14 @@ int evaluate(Board board, Player me, Player he) {
                         if (0 <= i + k && i + k < ROW && 0 <= j + l && j + l < COL)
                             if (board.get_cell_color(i + k, j + l) == he_color && board.get_orbs_num(i + k, j + l) == board.get_capacity(i + k, j + l) - 1) {
                                 // the neighbor is critical enermy
-                                score -= 5 - cap;
+                                score -= (5 - cap);
                                 flag_not_vulnerable = 0;
                             }
                 }
                 if (flag_not_vulnerable == 1) {
-                    if (num == 3)//corner
+                    if (cap == 3)//corner
                         score += 3;
-                    else if (num == 5)//edge
+                    else if (cap == 5)//edge
                         score += 2;
                     if (num == cap - 1)//critic
                         score += 2;
@@ -150,23 +152,25 @@ int evaluate(Board board, Player me, Player he) {
             }
             else he_orbs += num;
 
-        
+
         }
     }
 
     score += my_orbs;
-
+    int len = 0;
     int chain_l = 0;
     for (int i = 0; i < ROW; ++i) {
         for (int j = 0; j < COL; ++j) {
-            score += 2 * chain_len(board, me, visited, i, j);
+            len += chain_len(board, me, visited, i, j);
 
         }
     }
-    return score;
+    if (len > 0) 
+        score += 2 * len;
+    return score ;
 }
 
-int find_value(int i, int j, Board board, Player me, Player he, bool my_turn, int deep, int lower, int upper,float start_time) {
+int find_value(int i, int j, Board board, Player me, Player he, bool my_turn, int deep, int lower, int upper, float start_time) {
     int a;
     //cin >> a;
     if (my_turn)
@@ -199,10 +203,10 @@ int find_value(int i, int j, Board board, Player me, Player he, bool my_turn, in
         return INF;
     else if (is_loss && he_color_cnt > 1)
         return INF_N;
-    else if (deep == MAX_DEEP )
+    else if (deep == MAX_DEEP)
         return evaluate(board, me, he);
-    else if(runtime > MAX_RUNTIME) //return the current score
-        return evaluate(board, me,he);
+    else if (runtime > MAX_RUNTIME) //return the current score
+        return evaluate(board, me, he);
 
     else {//find the best path recurrsively
         if (my_turn) {//should do sth to end finding earily
@@ -216,7 +220,7 @@ int find_value(int i, int j, Board board, Player me, Player he, bool my_turn, in
                     int current_color = board.get_cell_color(row, col);
 
                     if (current_color == he_color || current_color == 'w') {
-                        val = find_value(row, col, board, me, he, 0, deep + 1, upper, lower,start_time);
+                        val = find_value(row, col, board, me, he, 0, deep + 1, upper, lower, start_time);
                         score = max(score, val);
 
                         lower = max(lower, score);
@@ -242,7 +246,7 @@ int find_value(int i, int j, Board board, Player me, Player he, bool my_turn, in
                     int current_color = board.get_cell_color(row, col);
 
                     if (current_color == my_color || current_color == 'w') {
-                        val = find_value(row, col, board, me, he, 1, deep + 1, upper, lower,start_time);
+                        val = find_value(row, col, board, me, he, 1, deep + 1, upper, lower, start_time);
                         score = min(score, val);
 
                         upper = min(upper, score);
@@ -264,34 +268,5 @@ int find_value(int i, int j, Board board, Player me, Player he, bool my_turn, in
 
 }
 
-/*
-int evaluate(Board board,int my_color) {
-    int score = 0;
 
-    for (int i = 0; i < ROW; ++i) {
-        for (int j = 0; j < COL; ++j) {
-            int current_color = board.get_cell_color(i, j);
-            int cap = board.get_capacity(i,j);
-            int num = board.get_orbs_num(i,j);
-            int max_val = 0;
 
-            for (int k = -1; k <= 1; ++k) {
-                for (int l = -1; l <= 1; ++l)
-                    if (i+k<ROW&&j+l<COL&&board.get_cell_color(i + k, j + l) != current_color)
-                        ++max_val;
-            }
-            if (cap - num == 0)
-                cin >> max_val;
-            int val = max_val / (cap - num);
-            if (current_color == my_color)
-                score += val;
-            else if (current_color != 'w')//own by other players
-                score -= val;
-        }
-    }
-
-    return score;
-}
-*/
-
- 
