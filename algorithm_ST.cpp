@@ -22,15 +22,15 @@
  * 3. The function that return the color fo the cell(row, col)
  * 4. The function that print out the current board statement
 *************************************************************************/
-#define INF 2147483647
-#define INF_N -2147483648
+#define INF 214748364
+#define INF_N -214748364
 
 using namespace std;
 #define ROW 5
 #define COL 6
 #define RED 'r'
 #define BLUE 'b'
-#define MAX_DEEP 7
+#define MAX_DEEP 4
 #define MAX_RUNTIME 1
 #define max(a,b) a>b?a:b
 #define min(a,b) a<b?a:b
@@ -84,34 +84,85 @@ void algorithm_A(Board board, Player player, int index[]) {
 
 }
 
+int chain_len(Board board, Player player, int visited[][COL], int i, int j) {
+    if (!(0 <= i && i < ROW && 0 <= j && j < COL))return 0;
+    if (visited[i][j])return 0;
+    if( player.get_color() != board.get_cell_color(i, j))return 0;
+
+    int num = board.get_orbs_num(i, j);
+    int cap = board.get_capacity(i, j);
+    if (num == cap - 1) {
+        visited[i][j] = 1;
+        int val = 1;
+        for (int k = -1; k <= 1; ++k) {
+            for (int l = -1; l <= 1; ++l) {
+                val += chain_len(board, player, visited, i + k, j + l);
+            }
+        }
+
+        return val;
+    }
+    else return 0;
+}
+
+
+
 int evaluate(Board board, Player me, Player he) {
     int score = 0;
     int my_color = me.get_color();
     int he_color = he.get_color();
     if (board.win_the_game(me) || he.is_illegal())return INF;
     else if (board.win_the_game(he) || me.is_illegal())return INF_N;
-
+    bool flag_not_vulnerable = 1;
+    int my_orbs = 0 ;
+    int he_orbs = 0;
+    int visited[ROW ][COL];
     for (int i = 0; i < ROW; ++i) {
         for (int j = 0; j < COL; ++j) {
+            visited[i][ j] = 0;
             int current_color = board.get_cell_color(i, j);
             int cap = board.get_capacity(i, j);
             int num = board.get_orbs_num(i, j);
-            int val = 0;
+            int val;
+            
 
-            for (int k = -1; k <= 1; ++k) {
-                for (int l = -1; l <= 1; ++l)
+            if (current_color == my_color) {
+                my_orbs += num;
+                for (int k = -1; k <= 1; ++k) {
+                    for (int l = -1; l <= 1; ++l)
 
-                    if (0 <= i + k && i + k < ROW && 0 <= j + l && j + l < COL)
-                        if (board.get_cell_color(i + k, j + l) == he_color)
-                            ++val;
-                        else if (board.get_cell_color(i + k, j + l) == my_color)
-                            --val;
+                        if (0 <= i + k && i + k < ROW && 0 <= j + l && j + l < COL)
+                            if (board.get_cell_color(i + k, j + l) == he_color && board.get_orbs_num(i + k, j + l) == board.get_capacity(i + k, j + l) - 1) {
+                                // the neighbor is critical enermy
+                                score -= 5 - cap;
+                                flag_not_vulnerable = 0;
+                            }
+                }
+                if (flag_not_vulnerable == 1) {
+                    if (num == 3)//corner
+                        score += 3;
+                    else if (num == 5)//edge
+                        score += 2;
+                    if (num == cap - 1)//critic
+                        score += 2;
+
+                }
             }
+            else he_orbs += num;
 
-            score+=val;
+        
         }
     }
 
+    score += my_orbs;
+
+    int chain_l = 0;
+    for (int i = 0; i < ROW; ++i) {
+        for (int j = 0; j < COL; ++j) {
+            score += 2 * chain_len(board, me, visited, i, j);
+
+        }
+    }
     return score;
 }
 
@@ -142,12 +193,15 @@ int find_value(int i, int j, Board board, Player me, Player he, bool my_turn, in
 
 
 
-
+    clock_t now = clock();
+    float runtime = (now - start_time) / CLOCKS_PER_SEC;
     if (is_win && my_color_cnt > 1)
         return INF;
     else if (is_loss && he_color_cnt > 1)
         return INF_N;
-    else if (deep == MAX_DEEP || ((clock()-start_time) / CLOCKS_PER_SEC) > MAX_RUNTIME) //return the current score
+    else if (deep == MAX_DEEP )
+        return evaluate(board, me, he);
+    else if(runtime > MAX_RUNTIME) //return the current score
         return evaluate(board, me,he);
 
     else {//find the best path recurrsively
